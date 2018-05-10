@@ -1,0 +1,45 @@
+```{r echo=TRUE}
+library(nycflights13)
+fligths<-nycflights13::flights
+#fligths
+
+# x <- fligths$arr_time - fligths$sched_arr_time
+# flights[which(x > 200), c('year', 'month')]
+# flights[which(x > 200), ]
+# flights[!is.na(flights$arr_delay) & flights$arr_delay > 200, 'arr_delay']
+attach(flights)
+
+# 2 hours of delay
+two_hours_delay = flights[!is.na(arr_delay) & arr_delay > 120, ]
+two_hours_delay
+
+# Flight that arrived the next day, with 21 hours 12 minutes of delay
+flights[!is.na(arr_delay) & arr_delay == 1272, c('dep_time', 'sched_dep_time', 'arr_time', 'sched_arr_time', 'arr_delay', 'air_time')]
+
+# Destinations
+flights[!is.na(dest) & (dest == 'IAH' | dest == 'HOU'), ]
+
+destinations <- c('IAH', 'HOU')
+flights[!is.na(dest) & dest %in% destinations, ]
+
+# Carriers
+# United <-> UN, American <-> AA, Delta <-> DL
+carriers <- c('UN', 'AA', 'DL')
+flights[!is.na(carrier) & carrier %in% carriers, ]
+
+# During summer (July, August, September)
+months <- c(7, 8, 9)
+flights[month %in% months, ]
+
+# 2 hours of delay but departed in time
+two_hours_delay[!is.na(two_hours_delay$dep_delay) & two_hours_delay$dep_delay == 0, ]
+
+# Departed between midnight and 6am
+flights[!is.na(dep_time) & dep_time >= 0 & dep_time <= 600, ]
+
+# Probably cancelled flights
+flights[is.na(dep_time) & is.na(arr_time), ]
+
+#asd = toString(2356)
+#as.POSIXct("2356", format="%H%M") - as.POSIXct(toString(2400 + 31), format="%H%M")
+```
