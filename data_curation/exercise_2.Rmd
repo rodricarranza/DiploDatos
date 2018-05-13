@@ -9,14 +9,68 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Clustering absenteeism at work
+
+## Load Libraries
+
+```{r}
+# Load libraries
+#library(corrplot)
+library(class)
+library(gmodels)
+```
+
+## Load data
+
 ```{r echo=TRUE}
 # Absenteeism at work Data Set
 # https://archive.ics.uci.edu/ml/datasets/Absenteeism+at+work
-absenteeismData <- read.csv(file="/Users/rodrigocarranza/Documents/Diplomatura/DiploDatos/datasets/Absenteeism_at_work.csv", header=TRUE, sep=";")
+dataset <- read.csv(file="../datasets/winequality-red.csv", header=TRUE, sep=",")
 ```
 
-```{r echo=True}
-# Apply z-score normalization to the data.
-normalizedDataset <- as.data.frame(scale(absenteeismData))
-attach(normalizedDataset)
+### View a couple of rows
+
+```{r}
+head(dataset)
+# summary(dataset)
+# dim(dataset[dataset$quality < 6,])
+# dim(dataset[dataset$quality >= 6,])
 ```
+
+# Normalize data
+```{r}
+mapping <- function(q) {
+  if (q < 7) {
+    return(0)
+  } else {
+    return(1)
+  } 
+}
+
+#dataset$quality <- lapply(dataset$quality, mapping)
+#lapply(dataset$quality, 12, mapping)
+# Create train and test indexes
+nr_rows <- nrow(normalized_dataset)
+partition_index = ceiling(nr_rows*0.8)
+train_indexes = 1:partition_index
+test_indexes = (partition_index + 1):nr_rows
+
+# Pick the labels for the test and train sets
+data_train_labels <- dataset[train_indexes, 'quality']
+data_test_labels  <- dataset[test_indexes, 'quality']
+table(data_train_labels)
+table(data_test_labels)
+
+# Drop 'quality' column
+data_to_norm <- dataset[, 1:11]
+
+# Apply z-score normalization to the data
+normalized_dataset <- as.data.frame(scale(data_to_norm))
+
+data_train <- normalized_dataset[train_indexes,]
+data_test  <- normalized_dataset[test_indexes,]
+
+data_test_pred <- knn(train=data_train, test=data_test, cl=data_train_labels, k=8)
+CrossTable(x=data_test_labels , y=data_test_pred, prop.chisq = FALSE)
+```
+
