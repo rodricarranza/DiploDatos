@@ -40,18 +40,18 @@ head(dataset)
 # Normalize data
 ```{r}
 mapping <- function(q) {
-  if (q < 7) {
+  if (q < 6) {
     return(0)
   } else {
     return(1)
   } 
 }
 
-#dataset$quality <- lapply(dataset$quality, mapping)
-#lapply(dataset$quality, 12, mapping)
+dataset$quality <- sapply(dataset$quality, mapping)
+
 # Create train and test indexes
 nr_rows <- nrow(normalized_dataset)
-partition_index = ceiling(nr_rows*0.8)
+partition_index = ceiling(nr_rows*0.7)
 train_indexes = 1:partition_index
 test_indexes = (partition_index + 1):nr_rows
 
@@ -70,7 +70,7 @@ normalized_dataset <- as.data.frame(scale(data_to_norm))
 data_train <- normalized_dataset[train_indexes,]
 data_test  <- normalized_dataset[test_indexes,]
 
-data_test_pred <- knn(train=data_train, test=data_test, cl=data_train_labels, k=8)
+data_test_pred <- knn(train=data_train, test=data_test, cl=data_train_labels, k=2)
 CrossTable(x=data_test_labels , y=data_test_pred, prop.chisq = FALSE)
 ```
 
