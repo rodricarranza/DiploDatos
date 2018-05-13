@@ -1,0 +1,22 @@
+---
+title: "Practico_2"
+author: "Norris-Carranza"
+date: "5/13/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=TRUE}
+# Absenteeism at work Data Set
+# https://archive.ics.uci.edu/ml/datasets/Absenteeism+at+work
+absenteeismData <- read.csv(file="/Users/rodrigocarranza/Documents/Diplomatura/DiploDatos/datasets/Absenteeism_at_work.csv", header=TRUE, sep=";")
+```
+
+```{r echo=True}
+# Apply z-score normalization to the data.
+normalizedDataset <- as.data.frame(scale(absenteeismData))
+attach(normalizedDataset)
+```
