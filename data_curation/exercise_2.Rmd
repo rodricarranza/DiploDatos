@@ -23,49 +23,52 @@ library(gmodels)
 ## Load data
 
 ```{r echo=TRUE}
-# Absenteeism at work Data Set
-# https://archive.ics.uci.edu/ml/datasets/Absenteeism+at+work
-dataset <- read.csv(file="../datasets/winequality-red.csv", header=TRUE, sep=",")
+# Seeds
+# https://archive.ics.uci.edu/ml/datasets/seeds
+# The dataset was a plain .txt file, was transformed into .csv following the description provided
+# The seeds being classified are: Kama, Rosa and Canadian. 70 elements each, randomly selected for # the experiment 
+original <- read.csv(file="../datasets/seeds.csv", header=TRUE, sep=",")
+# Shuffle the data (the original is ordered by seed type)
+dataset <- original[sample(nrow(original)),]
 ```
 
 ### View a couple of rows
 
 ```{r}
 head(dataset)
-# summary(dataset)
-# dim(dataset[dataset$quality < 6,])
-# dim(dataset[dataset$quality >= 6,])
+```
+
+# View summary
+```{r}
+summary(dataset)
+```
+
+# View summary
+```{r}
+dataset$seed_type
 ```
 
 # Normalize data
 ```{r}
-mapping <- function(q) {
-  if (q < 6) {
-    return(0)
-  } else {
-    return(1)
-  } 
-}
+# Drop 'seed_type' column
+data_to_norm <- dataset[, 1:7]
 
-dataset$quality <- sapply(dataset$quality, mapping)
+# Apply z-score normalization to the data
+normalized_dataset <- as.data.frame(scale(data_to_norm))
 
+# For training we are going to take 80% of the data and for testing the remaining 20%
 # Create train and test indexes
 nr_rows <- nrow(normalized_dataset)
-partition_index = ceiling(nr_rows*0.7)
+partition_index = ceiling(nr_rows*0.8)
 train_indexes = 1:partition_index
 test_indexes = (partition_index + 1):nr_rows
 
 # Pick the labels for the test and train sets
-data_train_labels <- dataset[train_indexes, 'quality']
-data_test_labels  <- dataset[test_indexes, 'quality']
+data_train_labels <- dataset[train_indexes, 'seed_type']
+data_test_labels  <- dataset[test_indexes, 'seed_type']
 table(data_train_labels)
 table(data_test_labels)
 
-# Drop 'quality' column
-data_to_norm <- dataset[, 1:11]
-
-# Apply z-score normalization to the data
-normalized_dataset <- as.data.frame(scale(data_to_norm))
 
 data_train <- normalized_dataset[train_indexes,]
 data_test  <- normalized_dataset[test_indexes,]
