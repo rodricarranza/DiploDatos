@@ -18,6 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 #library(corrplot)
 library(class)
 library(gmodels)
+
+# Set an initial seed
+set.seed(5)
 ```
 
 ## Load data
@@ -38,14 +41,16 @@ dataset <- original[sample(nrow(original)),]
 head(dataset)
 ```
 
-# View summary
+# Check the amount of records per seed type
 ```{r}
-summary(dataset)
+table(dataset$seed_type)
 ```
+
+Como se puede observar el dataset esta balanceado para las 3 clases de semillas: Kama, Rosa and Canadian. Se puede observar a continuaci??n un resumen de los estad??sticos m??s comunes analizados sobre cada atributo.
 
 # View summary
 ```{r}
-dataset$seed_type
+summary(dataset)
 ```
 
 # Normalize data
@@ -56,6 +61,12 @@ data_to_norm <- dataset[, 1:7]
 # Apply z-score normalization to the data
 normalized_dataset <- as.data.frame(scale(data_to_norm))
 
+# Let's check the first normalized values
+head(normalized_dataset)
+```
+
+# Separate Training and Test sets
+```{r}
 # For training we are going to take 80% of the data and for testing the remaining 20%
 # Create train and test indexes
 nr_rows <- nrow(normalized_dataset)
@@ -69,11 +80,97 @@ data_test_labels  <- dataset[test_indexes, 'seed_type']
 table(data_train_labels)
 table(data_test_labels)
 
-
 data_train <- normalized_dataset[train_indexes,]
 data_test  <- normalized_dataset[test_indexes,]
-
-data_test_pred <- knn(train=data_train, test=data_test, cl=data_train_labels, k=2)
-CrossTable(x=data_test_labels , y=data_test_pred, prop.chisq = FALSE)
 ```
 
+Es posible observar que para el entrenamiento la cantidad de datos por clase no varia mucho. Esto nos permite entrenar nuestro clasificador sin mucha desviaci??n hacia una clase en particular.
+
+Se proceder?? a utilizar el algoritmo kNN con diferentes valores para el par??metro K con el objetivo de ver que valor ajusta mejor.
+
+En general para la elecci??n de K se utiliza la "rule of thumb" que consiste en elegir el valor como la raiz cuadrada de la cantidad de atributos (feature). Si tomaramos esta regla en consideraci??n entonces el K inicial a probar ser??a K = 7^(1/2)
+
+```{r}
+best_K = 7^(0.5)
+best_K
+```
+
+Dado que `best_K` est?? pr??ximo a 3 procederemos a utilzar dicho valor para K y posteriormente analizaremos otras posibilidades.
+
+# K = 3
+
+```{r}
+data_test_pred_k3 <- knn(train=data_train, test=data_test, cl=data_train_labels, k=3)
+CrossTable(x=data_test_labels , y=data_test_pred_k3, prop.chisq = FALSE)
+```
+
+# K = 5
+
+```{r}
+data_test_pred_k5 <- knn(train=data_train, test=data_test, cl=data_train_labels, k=5)
+CrossTable(x=data_test_labels , y=data_test_pred_k5, prop.chisq = FALSE)
+```
+
+# K = 10
+
+```{r}
+data_test_pred_k9 <- knn(train=data_train, test=data_test, cl=data_train_labels, k=9)
+CrossTable(x=data_test_labels , y=data_test_pred_k9, prop.chisq = FALSE)
+```
+
+# K = 11
+
+```{r}
+data_test_pred_k10 <- knn(train=data_train, test=data_test, cl=data_train_labels, k=10)
+CrossTable(x=data_test_labels , y=data_test_pred_k10, prop.chisq = FALSE)
+```
+
+Para valores de K entre 9 y 20 los resultados son pr??cticamente los mismos.
+
+Con K = 3 se obtiene el mejor resultado. Esto se debe en parte a la naturaleza del dataset. Tiene las siguiente ventajas:
+ - Es un dataset balanceado en la cantidad de muestras por clases.
+ - Ha sido verificado y estudiado.
+ - Los valores de los atributos son num??ricos
+ - Los atributos presentados son clave para identificar cada clase. Pr??cticamente no hay attributo que se pueda descartar.
+ 
+Si bien la regla de utilizar la raiz cuadrada de la cantidad de features nos otorg?? los mejores resultados, y considerada el mejor punto para comenzar, no siempre es la mejor opci??n. El valor del par??metro K var??a en base al problema que se esta abordando y a los datos que se tienen disponibles.
+
+Como se discuti?? durante el curso de la materia, el normalizar los datos nos sirve para que el c??lculo de la distancia en kNN no se vea afectado por valores muy grandes. Normalizar sirve para que todos los features contribuyan equitativamente a la formula de distancia.
+
+Veremos a continuaci??n que resultados se pueden obtener al utilizar kNN con K = 3 pero sin normalizar los datos.
+
+# Separate Training and Test sets (Not normalized data)
+```{r}
+# For training we are going to take 80% of the data and for testing the remaining 20%
+# Create train and test indexes
+# here `nn` stands for not_normalized, just to avoid colision with previous variables
+nn_nr_rows <- nrow(data_to_norm) # data_to_norm is the original dataset without the labels
+nn_partition_index = ceiling(nn_nr_rows*0.8)
+nn_train_indexes = 1:nn_partition_index
+nn_test_indexes = (nn_partition_index + 1):nn_nr_rows
+
+# Pick the labels for the test and train sets
+nn_data_train_labels <- dataset[nn_train_indexes, 'seed_type']
+nn_data_test_labels  <- dataset[nn_test_indexes, 'seed_type']
+table(nn_data_train_labels)
+table(nn_data_test_labels)
+
+nn_data_train <- data_to_norm[nn_train_indexes,]
+nn_data_test  <- data_to_norm[nn_test_indexes,]
+```
+
+# K = 3
+
+```{r}
+data_test_pred_nn <- knn(train=nn_data_train, test=nn_data_test, cl=nn_data_train_labels, k=3)
+CrossTable(x=nn_data_test_labels , y=data_test_pred_nn, prop.chisq = FALSE)
+```
+
+# K = 3
+
+```{r}
+data_test_pred_nn_9 <- knn(train=nn_data_train, test=nn_data_test, cl=nn_data_train_labels, k=9)
+CrossTable(x=nn_data_test_labels , y=data_test_pred_nn_9, prop.chisq = FALSE)
+```
+
+Si bien los valores siguen siendo bastante buenos, no son mejores que los obtenidos con los datos normalizados. Curiosamente cuando K = 9 se logran obtener los mismos resultados que habiendo normalizado los datos. Al normalizar los datos un valor de K = 9 daba resultados inferiores si los datos estaban normalizados.
