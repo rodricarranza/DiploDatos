@@ -132,8 +132,9 @@ Con K = 3 se obtiene el mejor resultado. Esto se debe en parte a la naturaleza d
  - Ha sido verificado y estudiado.
  - Los valores de los atributos son num??ricos
  - Los atributos presentados son clave para identificar cada clase. Pr??cticamente no hay attributo que se pueda descartar.
+ - No hay valores nulos (Nan)
  
-Si bien la regla de utilizar la raiz cuadrada de la cantidad de features nos otorg?? los mejores resultados, y considerada el mejor punto para comenzar, no siempre es la mejor opci??n. El valor del par??metro K var??a en base al problema que se esta abordando y a los datos que se tienen disponibles.
+Si bien la regla de utilizar la raiz cuadrada de la cantidad de features nos otorg?? los mejores resultados, y considerada el mejor punto para comenzar, no siempre es la mejor opci??n. El valor del par??metro K var??a en base al problema que se esta abordando y a los datos que se tienen disponibles. El m??todo cross-validation puede ser bastante ??til para elegir el mejor valor de K en base a multiples pruebas sobre diferentes configuraciones del conjunto de entrenamiento y prueba, analizando performance y errores.
 
 Como se discuti?? durante el curso de la materia, el normalizar los datos nos sirve para que el c??lculo de la distancia en kNN no se vea afectado por valores muy grandes. Normalizar sirve para que todos los features contribuyan equitativamente a la formula de distancia.
 
@@ -166,7 +167,7 @@ data_test_pred_nn <- knn(train=nn_data_train, test=nn_data_test, cl=nn_data_trai
 CrossTable(x=nn_data_test_labels , y=data_test_pred_nn, prop.chisq = FALSE)
 ```
 
-# K = 3
+# K = 9
 
 ```{r}
 data_test_pred_nn_9 <- knn(train=nn_data_train, test=nn_data_test, cl=nn_data_train_labels, k=9)
