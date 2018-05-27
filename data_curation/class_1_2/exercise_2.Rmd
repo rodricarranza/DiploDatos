@@ -30,7 +30,7 @@ set.seed(5)
 # https://archive.ics.uci.edu/ml/datasets/seeds
 # The dataset was a plain .txt file, was transformed into .csv following the description provided
 # The seeds being classified are: Kama, Rosa and Canadian. 70 elements each, randomly selected for # the experiment 
-original <- read.csv(file="../datasets/seeds.csv", header=TRUE, sep=",")
+original <- read.csv(file="../../datasets/seeds.csv", header=TRUE, sep=",")
 # Shuffle the data (the original is ordered by seed type)
 dataset <- original[sample(nrow(original)),]
 ```
